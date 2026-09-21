@@ -1,0 +1,11 @@
+a {
+  text-decoration: none;
+}
+
+input.form-control {
+  padding: 0.3rem;
+}
+
+textarea.form-control {
+  min-height: calc(15em + 0.75rem + 2px);
+}
