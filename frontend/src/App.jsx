@@ -18,6 +18,9 @@ import AboutPage from "./pages/site/AboutPage";
 import ContactPage from "./pages/site/ContactPage";
 import BuyCreditsPage from "./pages/site/BuyCreditsPage";
 import NonPerformingDomainsPage from "./pages/site/NonPerformingDomainsPage";
+import BuyCreditsIndiaPage from "./pages/site/BuyCreditsIndiaPage";
+import LegalPage from "./pages/site/LegalPage";
+import { privacyPolicy, termsOfService, refundPolicy } from "./content/legal";
 import { authUrl } from "./api/endpoints";
 import Header from "./components/header";
 import Footer from "./components/footer";
@@ -218,6 +221,28 @@ const App = () => {
                 exact
                 component={NonPerformingDomainsPage}
                 user={user}
+              />
+              {/* Second path is the old WordPress address for the same page */}
+              <SiteRoute
+                path={["/buy-credits-india", "/buy-credit-indian-users"]}
+                exact
+                component={BuyCreditsIndiaPage}
+                user={user}
+              />
+              <Route
+                path='/privacy-policy'
+                exact
+                render={() => <LegalPage doc={privacyPolicy} />}
+              />
+              <Route
+                path='/terms-of-service'
+                exact
+                render={() => <LegalPage doc={termsOfService} />}
+              />
+              <Route
+                path='/refund-cancellation'
+                exact
+                render={() => <LegalPage doc={refundPolicy} />}
               />
               <SiteRoute path='/' exact component={HomePage} user={user} />
 

@@ -32,10 +32,25 @@ export const packages = [
 ];
 
 export const checkout = {
-  // TODO: URL of the UPI / net-banking checkout for customers in India. The
-  // old WordPress page linked to one; the banner is hidden while this is empty.
-  indiaUrl: "",
+  // Where the "Paying from India?" banner on the Buy Credits page links to.
+  // The banner is hidden while this is empty.
+  indiaUrl: "/buy-credits-india",
 };
+
+// INR packages paid through Razorpay Payment Buttons, carried over from the
+// old WordPress page linkdexing.com/buy-credits-india/. Each buttonId is a
+// button configured in the Razorpay dashboard with its own fixed amount -
+// changing a price here does NOT change what Razorpay charges; edit the
+// button in Razorpay too.
+export const indiaPackages = [
+  { credits: 200, subtotal: 920, gst: 165.6, total: 1085.6, buttonId: "pl_OL2FTMwAtrdjxI" },
+  { credits: 500, subtotal: 2300, gst: 414, total: 2714, buttonId: "pl_OL36zJCDsjFtYz" },
+  { credits: 1000, subtotal: 4600, gst: 828, total: 5428, buttonId: "pl_OL3M1dwVLiHNnv" },
+  { credits: 2000, subtotal: 9200, gst: 1656, total: 10856, buttonId: "pl_OL3RVPAp3LlgTD" },
+  { credits: 5000, bonusPct: 5, subtotal: 23000, gst: 4140, total: 27140, buttonId: "pl_OL3e9vb4K705D8" },
+  { credits: 10000, bonusPct: 10, subtotal: 46000, gst: 8280, total: 54280, buttonId: "pl_OLQXM4Cxe2TM6R" },
+  { credits: 15000, bonusPct: 15, subtotal: 69000, gst: 12420, total: 81420, buttonId: "pl_OLQaq6SVQYAnBs" },
+];
 
 export const nonPerformingDomains = {
   updatedOn: "2025-12-02",

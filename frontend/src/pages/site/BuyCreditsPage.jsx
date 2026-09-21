@@ -264,9 +264,9 @@ export default function BuyCreditsPage({ user }) {
           {checkout.indiaUrl && (
             <div className="notice">
               Paying from India?{" "}
-              <a href={checkout.indiaUrl}>
+              <Link to={checkout.indiaUrl}>
                 Buy credits with UPI, net banking, cards or wallets
-              </a>{" "}
+              </Link>{" "}
               instead of PayPal.
             </div>
           )}

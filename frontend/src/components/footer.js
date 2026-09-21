@@ -15,6 +15,9 @@ const columns = [
     links: [
       { to: "/about", label: "About" },
       { to: "/contact", label: "Contact" },
+      { to: "/privacy-policy", label: "Privacy Policy" },
+      { to: "/terms-of-service", label: "Terms of Service" },
+      { to: "/refund-cancellation", label: "Refund & Cancellation" },
     ],
   },
   {
