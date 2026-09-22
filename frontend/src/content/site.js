@@ -13,6 +13,16 @@ export const company = {
   supportHours: "Replies within 24 working hours. Closed on weekends.",
 };
 
+// Pages that live on the main WordPress site (linkdexing.com), not in this app.
+export const mainSite = {
+  home: "https://linkdexing.com/",
+  about: "https://linkdexing.com/about/",
+  contact: "https://linkdexing.com/contact/",
+  terms: "https://linkdexing.com/terms-of-service/",
+  privacy: "https://linkdexing.com/privacy-policy/",
+  refund: "https://linkdexing.com/refund-cancellation/",
+};
+
 export const pricing = {
   perCreditUsd: 0.05,
   perCreditInr: 4.125,

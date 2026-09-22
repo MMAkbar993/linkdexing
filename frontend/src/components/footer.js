@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { company } from "../content/site";
+import { company, mainSite } from "../content/site";
 
+// `href` = a page on the main WordPress site; `to` = a page inside this app.
 const columns = [
   {
     title: "Service",
     links: [
-      { to: "/", label: "Home" },
+      { href: mainSite.home, label: "Home" },
       { to: "/buy-credits", label: "Buy Credits" },
       { to: "/non-performing-domains", label: "Non-Performing Domains" },
     ],
@@ -13,11 +14,11 @@ const columns = [
   {
     title: "Company",
     links: [
-      { to: "/about", label: "About" },
-      { to: "/contact", label: "Contact" },
-      { to: "/privacy-policy", label: "Privacy Policy" },
-      { to: "/terms-of-service", label: "Terms of Service" },
-      { to: "/refund-cancellation", label: "Refund & Cancellation" },
+      { href: mainSite.about, label: "About" },
+      { href: mainSite.contact, label: "Contact" },
+      { href: mainSite.privacy, label: "Privacy Policy" },
+      { href: mainSite.terms, label: "Terms of Service" },
+      { href: mainSite.refund, label: "Refund & Cancellation" },
     ],
   },
   {
@@ -50,8 +51,12 @@ export default function Footer() {
               <h4>{col.title}</h4>
               <ul>
                 {col.links.map((l) => (
-                  <li key={l.to}>
-                    <Link to={l.to}>{l.label}</Link>
+                  <li key={l.label}>
+                    {l.href ? (
+                      <a href={l.href}>{l.label}</a>
+                    ) : (
+                      <Link to={l.to}>{l.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -1,11 +1,13 @@
 import { Link, NavLink } from "react-router-dom";
+import { mainSite } from "../content/site";
 
+// `href` = a page on the main WordPress site; `to` = a page inside this app.
 const navLinks = [
-  { to: "/", label: "Home", exact: true },
-  { to: "/about", label: "About" },
+  { href: mainSite.home, label: "Home" },
+  { href: mainSite.about, label: "About" },
   { to: "/buy-credits", label: "Buy Credits" },
   { to: "/non-performing-domains", label: "Non-Performing Domains" },
-  { to: "/contact", label: "Contact" },
+  { href: mainSite.contact, label: "Contact" },
 ];
 
 export default function Header({ setRefresh, user }) {
@@ -18,9 +20,9 @@ export default function Header({ setRefresh, user }) {
     <header className="site-header">
       <nav className="navbar navbar-expand-lg site-nav" aria-label="Main">
         <div className="wrap">
-          <Link className="brand" to="/">
+          <a className="brand" href={mainSite.home}>
             <img src="/logo.png" alt="Linkdexing" />
-          </Link>
+          </a>
 
           <button
             className="nav-toggle d-lg-none"
@@ -36,16 +38,17 @@ export default function Header({ setRefresh, user }) {
 
           <div className="collapse navbar-collapse" id="siteNav">
             <ul className="navbar-nav site-nav-links mx-lg-auto">
-              {navLinks.map(({ to, label, exact }) => (
-                <li className="nav-item" key={to}>
-                  <NavLink
-                    to={to}
-                    exact={exact}
-                    className="nav-link"
-                    activeClassName="is-active"
-                  >
-                    {label}
-                  </NavLink>
+              {navLinks.map(({ to, href, label }) => (
+                <li className="nav-item" key={label}>
+                  {href ? (
+                    <a href={href} className="nav-link">
+                      {label}
+                    </a>
+                  ) : (
+                    <NavLink to={to} className="nav-link" activeClassName="is-active">
+                      {label}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>
