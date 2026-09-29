@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { privateApi } from '../api';
@@ -9,6 +9,21 @@ import { Icon } from '../components/Icon';
 const HEAVY_USER_LINKS = 10000;
 const PAGE_SIZE = 200;
 const num = (n) => (n ?? 0).toLocaleString('en-US');
+
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'links', label: 'Most links used' },
+];
+
+const joinedDate = (iso) =>
+  iso
+    ? new Date(iso).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : '—';
 
 // "Add credits" modal — also handles deducting, via a negative amount, for
 // correcting a mistaken add.
@@ -108,19 +123,25 @@ const Users = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [creditsTarget, setCreditsTarget] = useState(null);
+  const [sort, setSort] = useState('newest');
+  // Lets every existing fetchUsers(query, page) call keep the current sort
+  // without passing it through each call site.
+  const sortRef = useRef(sort);
+  sortRef.current = sort;
 
-  const fetchUsers = useCallback(async (q, p) => {
+  const fetchUsers = useCallback(async (q, p, s = sortRef.current) => {
     setLoading(true);
     try {
       const { users, total } = (
         await privateApi.get(`${userUrl}/search`, {
-          params: { ...(q ? { q } : {}), page: p, limit: PAGE_SIZE },
+          params: { ...(q ? { q } : {}), page: p, limit: PAGE_SIZE, sort: s },
         })
       ).data;
       setUsers(users);
       setTotal(total);
       setQuery(q || '');
       setPage(p);
+      setSort(s);
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
@@ -209,6 +230,19 @@ const Users = () => {
               View all
             </button>
           </form>
+          <select
+            className="form-select"
+            aria-label="Sort users"
+            value={sort}
+            onChange={(e) => fetchUsers(query, 1, e.target.value)}
+            disabled={loading}
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="table-wrap">
@@ -217,6 +251,7 @@ const Users = () => {
               <tr>
                 <th scope="col">Name</th>
                 <th scope="col">Email</th>
+                <th scope="col">Joined</th>
                 <th scope="col" className="num">
                   Links purchased
                 </th>
@@ -233,7 +268,7 @@ const Users = () => {
             <tbody>
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="empty">
+                  <td colSpan={8} className="empty">
                     {loading ? 'Loading…' : 'No users found.'}
                   </td>
                 </tr>
@@ -247,6 +282,7 @@ const Users = () => {
                   >
                     <td>{user.name}</td>
                     <td className="muted">{user.email}</td>
+                    <td className="muted">{joinedDate(user.createdAt)}</td>
                     <td className="num">{num(user.creditsPurchased)}</td>
                     <td className="num">{num(user.totalLinks)}</td>
                     <td className="num">{num(user.creditBalance)}</td>
@@ -299,6 +335,14 @@ const Users = () => {
             <button
               type="button"
               className="btn-x ghost sm"
+              onClick={() => fetchUsers(query, 1)}
+              disabled={loading || page <= 1}
+            >
+              First
+            </button>
+            <button
+              type="button"
+              className="btn-x ghost sm"
               onClick={() => fetchUsers(query, page - 1)}
               disabled={loading || page <= 1}
             >
@@ -314,6 +358,14 @@ const Users = () => {
               disabled={loading || page >= lastPage}
             >
               Next
+            </button>
+            <button
+              type="button"
+              className="btn-x ghost sm"
+              onClick={() => fetchUsers(query, lastPage)}
+              disabled={loading || page >= lastPage}
+            >
+              Last
             </button>
           </div>
         </div>

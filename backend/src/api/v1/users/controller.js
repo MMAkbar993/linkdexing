@@ -32,18 +32,32 @@ exports.verifyUser = async (req, res, next) => {
 };
 
 // Get users by email
+// _id breaks ties so paging is stable - thousands of users share
+// totalLinks 0, and without a tiebreaker their order shifts between pages.
+const USER_SORTS = {
+  newest: { createdAt: -1, _id: -1 },
+  oldest: { createdAt: 1, _id: 1 },
+  links: { totalLinks: -1, _id: -1 },
+};
+
 exports.getUsers = async (req, res, next) => {
   try {
     var q = req.query.q;
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 50));
     const skip = (page - 1) * limit;
+    const sort = USER_SORTS[req.query.sort] || USER_SORTS.links;
 
-    const filter = q ? { email: { $regex: new RegExp(q) } } : {};
+    // Escaped so a search like "john+tag@gmail.com" matches literally
+    // instead of being read as a regex (and "(" doesn't crash it).
+    const filter = q
+      ? { email: { $regex: new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") } }
+      : {};
 
     const [users, total] = await Promise.all([
       User.find(filter)
-        .sort({ totalLinks: -1 })
+        .select("-password -otpSecret -forgotPasswordToken")
+        .sort(sort)
         .skip(skip)
         .limit(limit),
       User.countDocuments(filter),
