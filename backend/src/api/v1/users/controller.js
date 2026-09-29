@@ -623,31 +623,44 @@ exports.verifyOtp = async (req, res, next) => {
       throw new Error("Invalid otp");
     }
 
-    // List Id in SendInBlues
-    let listId = 5;
-
-    // Create contact in sendinblues
-    let createContact = new SibApiV3Sdk.CreateContact();
-
-    // Add contact to id=5 (Linkdexing.com users)
-    let contactEmails = new SibApiV3Sdk.AddContactToList();
-
-    createContact.email = user.email;
-    const names = user.name.trim().split(" ");
-    if (names.length === 1) {
-      createContact.attributes = { FIRSTNAME: names[0] };
-    } else {
-      createContact.attributes = { FIRSTNAME: names[0], LASTNAME: names[1] };
-    }
-    contactEmails.emails = [user.email];
-
-    await ContactApi.createContact(createContact);
-
-    await ContactApi.addContactToList(listId, contactEmails);
-
-    // OTP is verified, remove OTP Secret
+    // OTP is verified, remove OTP Secret. Done before the mailing-list sync
+    // below so that a Brevo problem can never block someone from finishing
+    // signup — that used to fail the whole request with Brevo's own
+    // "Bad Request" message and leave the account unverifiable.
     user.otpSecret = undefined;
     await user.save();
+
+    // Add them to the "Linkdexing.com Users" list in Brevo. Best-effort: a
+    // failure here is logged for us, never shown to the user.
+    try {
+      const listId = 5;
+
+      const createContact = new SibApiV3Sdk.CreateContact();
+      createContact.email = user.email;
+      // The contact often already exists — Brevo's chat/tracking widget adds
+      // site visitors to its "identified_contacts" list on its own, and
+      // creating a duplicate is rejected. Update it instead of failing.
+      createContact.updateEnabled = true;
+
+      const names = user.name.trim().split(" ");
+      if (names.length === 1) {
+        createContact.attributes = { FIRSTNAME: names[0] };
+      } else {
+        createContact.attributes = { FIRSTNAME: names[0], LASTNAME: names[1] };
+      }
+
+      const contactEmails = new SibApiV3Sdk.AddContactToList();
+      contactEmails.emails = [user.email];
+
+      await ContactApi.createContact(createContact);
+      await ContactApi.addContactToList(listId, contactEmails);
+    } catch (err) {
+      console.error(
+        "Brevo contact sync failed for",
+        user.email,
+        err.response?.body || err.message
+      );
+    }
 
     return res.json({
       ok: true,
