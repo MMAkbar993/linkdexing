@@ -161,6 +161,8 @@ a:hover { color: var(--green); }
 .modal-x label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
 .modal-x .hint { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
 .modal-x .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.modal-x.wide { max-width: 860px; max-height: 88vh; display: flex; flex-direction: column; }
+.modal-x .modal-scroll { overflow: auto; min-height: 0; border: 1px solid var(--line); border-radius: 8px; }
 
 @media (max-width: 640px) {
   .stat-row { grid-template-columns: 1fr; }

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { checkAuthStatus, isNotRestrict } = require("../users/controller");
+const { checkAuthStatus, isNotRestrict, requireAdmin } = require("../users/controller");
 const {
   checkStandalone,
   checkOrder,
@@ -7,7 +7,14 @@ const {
   myBatches,
   getBatch,
   batchForOrder,
+  adminListBatches,
+  adminGetBatch,
 } = require("./controller");
+
+// Admin views of every customer's checks. Declared before "/:id" so that
+// route never sees "admin" as a batch id.
+router.get("/admin/batches", checkAuthStatus, requireAdmin, adminListBatches);
+router.get("/admin/batches/:id", checkAuthStatus, requireAdmin, adminGetBatch);
 
 router.get("/estimate", checkAuthStatus, estimateCost);
 
