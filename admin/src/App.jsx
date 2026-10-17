@@ -10,6 +10,7 @@ import Users from './pages/Users';
 import Payments from './pages/Payments';
 import Submissions from './pages/Submissions';
 import Coupons from './pages/Coupons';
+import IndexChecks from './pages/IndexChecks';
 import Settings from './pages/Settings';
 
 const PublicRoute = ({
@@ -79,6 +80,11 @@ function App() {
             <PrivateRoute
               path="/coupons"
               component={Coupons}
+              loggedIn={loggedIn}
+            />
+            <PrivateRoute
+              path="/index-checks"
+              component={IndexChecks}
               loggedIn={loggedIn}
             />
             <PrivateRoute

@@ -3,6 +3,7 @@ const IndexCheckBatch = require("./models/indexCheckBatch.entity");
 const IndexCheck = require("./models/indexCheck.entity");
 const Link = require("../links/models/link.entity");
 const Order = require("../orders/models/order.entity");
+const User = require("../users/models/user.entity");
 const indexChecker = require("../../../services/indexChecker");
 const credits = require("../../../services/credits");
 const settings = require("../../../services/settings");
@@ -218,6 +219,91 @@ exports.getBatch = async (req, res, next) => {
       return res.status(404).json({ ok: false, message: "Batch not found" });
     }
     const checks = await IndexCheck.find({ batchId: id }).sort({ url: 1 });
+    return res.json({ ok: true, batch, checks });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+// ---------------------------------------------------------------------
+// Admin: every customer's checks (routes.js gates these with requireAdmin).
+// ---------------------------------------------------------------------
+
+const BATCH_STATUSES = ["pending", "completed", "failed"];
+
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// Looked up separately rather than via populate() so a batch whose customer
+// has since been deleted still lists, just without an email.
+async function usersById(ids) {
+  const users = await User.find({ _id: { $in: ids } })
+    .select("name email")
+    .lean();
+  return new Map(users.map((u) => [String(u._id), u]));
+}
+
+exports.adminListBatches = async (req, res, next) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (BATCH_STATUSES.includes(req.query.status)) {
+      filter.status = req.query.status;
+    }
+
+    const q = String(req.query.q || "").trim();
+    if (q) {
+      const matches = await User.find({
+        email: { $regex: new RegExp(escapeRegex(q), "i") },
+      })
+        .select("_id")
+        .lean();
+      filter.userId = { $in: matches.map((u) => u._id) };
+    }
+
+    const [batches, total] = await Promise.all([
+      IndexCheckBatch.find(filter)
+        .select("-externalProjectId -pollFailures")
+        .sort({ createdAt: -1, _id: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      IndexCheckBatch.countDocuments(filter),
+    ]);
+
+    const users = await usersById(batches.map((b) => b.userId));
+    for (const b of batches) {
+      b.user = users.get(String(b.userId)) || null;
+    }
+
+    return res.json({ ok: true, batches, page, limit, total });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.adminGetBatch = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).json({ ok: false, message: "Batch not found" });
+    }
+
+    const batch = await IndexCheckBatch.findById(id)
+      .select("-externalProjectId -pollFailures")
+      .lean();
+    if (!batch) {
+      return res.status(404).json({ ok: false, message: "Batch not found" });
+    }
+
+    const [checks, users] = await Promise.all([
+      IndexCheck.find({ batchId: id }).select("url result checkedAt").sort({ url: 1 }).lean(),
+      usersById([batch.userId]),
+    ]);
+    batch.user = users.get(String(batch.userId)) || null;
+
     return res.json({ ok: true, batch, checks });
   } catch (err) {
     return next(err);

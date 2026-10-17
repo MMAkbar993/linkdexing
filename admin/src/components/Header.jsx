@@ -29,6 +29,9 @@ const Header = ({ loggedIn, setLoggedIn }) => {
               <NavLink to="/submissions" activeClassName="is-active">
                 Submissions
               </NavLink>
+              <NavLink to="/index-checks" activeClassName="is-active">
+                Index checks
+              </NavLink>
               <NavLink to="/coupons" activeClassName="is-active">
                 Coupons
               </NavLink>

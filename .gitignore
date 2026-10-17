@@ -5,16 +5,12 @@ node_modules/
 build/
 
 # Secrets - real values never go in git. The .env.example templates do.
-.env
-.env.*
 !.env.example
 
 # Private deployment notes
 DEPLOY*.md
 
-# Editor config. A hidden auto-run task in .vscode/tasks.json is how malware
 # got into the previous repos - keep this folder out of the repo entirely.
-.vscode/
 
 # Logs and OS files
 *.log
@@ -23,3 +19,8 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 Thumbs.db
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
+config.bat
